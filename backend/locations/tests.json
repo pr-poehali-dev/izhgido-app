@@ -1,0 +1,26 @@
+{
+  "tests": [
+    {
+      "name": "Get all locations and districts",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "locations": "array",
+        "districts": "array",
+        "total": "number"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Get locations by category",
+      "method": "GET",
+      "path": "/?category=Услуги",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "locations": "array"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

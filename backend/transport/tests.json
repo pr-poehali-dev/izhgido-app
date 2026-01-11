@@ -1,0 +1,16 @@
+{
+  "tests": [
+    {
+      "name": "Get live transport data",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "transport": "array",
+        "total": "number",
+        "timestamp": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

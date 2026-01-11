@@ -1,78 +1,51 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
+import { useQuery } from '@tanstack/react-query';
+
+const API_URLS = {
+  events: 'https://functions.poehali.dev/0e39bfcf-c8a1-46bb-af1a-15e8ac843de4',
+  transport: 'https://functions.poehali.dev/feb1df06-dd25-41c1-8933-c13f5ab90468',
+  locations: 'https://functions.poehali.dev/ce6cf49d-7994-4d20-a84c-04b9192029d3'
+};
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('home');
 
-  const transportData = [
-    { 
-      route: '№ 24', 
-      name: 'Ижсталь - Центр', 
-      time: '2 мин', 
-      status: 'В пути',
-      color: 'bg-primary'
+  const { data: eventsData } = useQuery({
+    queryKey: ['events'],
+    queryFn: async () => {
+      const response = await fetch(API_URLS.events);
+      return response.json();
     },
-    { 
-      route: '№ 15', 
-      name: 'Воткинское шоссе - Аэропорт', 
-      time: '7 мин', 
-      status: 'Приближается',
-      color: 'bg-secondary'
-    },
-    { 
-      route: '№ 8', 
-      name: 'Автозаводская - Центральная площадь', 
-      time: '12 мин', 
-      status: 'В пути',
-      color: 'bg-accent'
-    },
-  ];
+    refetchInterval: 60000
+  });
 
-  const events = [
-    {
-      title: 'Фестиваль «Ижевская зима»',
-      date: '15 января',
-      time: '12:00',
-      location: 'Центральная площадь',
-      category: 'Фестиваль',
-      image: 'festival'
+  const { data: transportData } = useQuery({
+    queryKey: ['transport'],
+    queryFn: async () => {
+      const response = await fetch(API_URLS.transport);
+      return response.json();
     },
-    {
-      title: 'Выставка современного искусства',
-      date: '18 января',
-      time: '18:00',
-      location: 'Музей Калашникова',
-      category: 'Выставка',
-      image: 'art'
-    },
-    {
-      title: 'Концерт симфонического оркестра',
-      date: '22 января',
-      time: '19:00',
-      location: 'Театр оперы и балета',
-      category: 'Концерт',
-      image: 'music'
-    },
-  ];
+    refetchInterval: 30000
+  });
 
-  const locations = [
-    { name: 'МФЦ Центральный', address: 'ул. Пушкинская, 278', category: 'Услуги', icon: 'Building2' },
-    { name: 'Поликлиника №1', address: 'ул. Удмуртская, 261', category: 'Здоровье', icon: 'Heart' },
-    { name: 'Парк Кирова', address: 'ул. Кирова, 135', category: 'Отдых', icon: 'TreePine' },
-    { name: 'Музей Калашникова', address: 'ул. Бородина, 19', category: 'Культура', icon: 'Landmark' },
-  ];
+  const { data: locationsData } = useQuery({
+    queryKey: ['locations'],
+    queryFn: async () => {
+      const response = await fetch(API_URLS.locations);
+      return response.json();
+    },
+    refetchInterval: 300000
+  });
 
-  const districts = [
-    { name: 'Устиновский', population: '170 тыс.', color: 'bg-primary' },
-    { name: 'Ленинский', population: '145 тыс.', color: 'bg-secondary' },
-    { name: 'Октябрьский', population: '125 тыс.', color: 'bg-accent' },
-    { name: 'Индустриальный', population: '95 тыс.', color: 'bg-purple-500' },
-    { name: 'Первомайский', population: '110 тыс.', color: 'bg-pink-500' },
-  ];
+  const transport = transportData?.transport || [];
+  const events = eventsData?.events || [];
+  const locations = locationsData?.locations || [];
+  const districts = locationsData?.districts || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -143,20 +116,20 @@ const Index = () => {
             </div>
             
             <div className="grid gap-4">
-              {transportData.map((transport, idx) => (
+              {transport.map((item: any, idx: number) => (
                 <Card key={idx} className="p-4 hover:scale-[1.02] transition-transform duration-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className={`w-14 h-14 rounded-xl ${transport.color} flex items-center justify-center`}>
-                        <span className="text-white font-bold text-lg">{transport.route}</span>
+                      <div className={`w-14 h-14 rounded-xl ${item.color} flex items-center justify-center`}>
+                        <span className="text-white font-bold text-lg">№ {item.route}</span>
                       </div>
                       <div>
-                        <h4 className="font-semibold">{transport.name}</h4>
-                        <p className="text-sm text-muted-foreground">{transport.status}</p>
+                        <h4 className="font-semibold">{item.name}</h4>
+                        <p className="text-sm text-muted-foreground">{item.status}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-primary">{transport.time}</p>
+                      <p className="text-2xl font-bold text-primary">{item.time}</p>
                       <Button variant="ghost" size="sm">
                         <Icon name="MapPinned" size={16} />
                       </Button>
@@ -187,7 +160,7 @@ const Index = () => {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {events.map((event, idx) => (
+              {events.map((event: any, idx: number) => (
                 <Card key={idx} className="overflow-hidden hover:scale-[1.02] transition-transform duration-200">
                   <div className="h-40 gradient-orange-pink flex items-center justify-center">
                     <Icon name="Sparkles" size={64} className="text-white/30" />
@@ -198,7 +171,7 @@ const Index = () => {
                     <div className="space-y-1 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Icon name="Calendar" size={14} />
-                        {event.date} в {event.time}
+                        {new Date(event.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })} в {event.time}
                       </div>
                       <div className="flex items-center gap-2">
                         <Icon name="MapPin" size={14} />
@@ -206,7 +179,7 @@ const Index = () => {
                       </div>
                     </div>
                     <Button className="w-full mt-2 gradient-purple-blue text-white border-0">
-                      Купить билет
+                      {event.price > 0 ? `Купить ${event.price} ₽` : 'Бесплатно'}
                     </Button>
                   </div>
                 </Card>
@@ -233,12 +206,12 @@ const Index = () => {
 
             <div className="grid gap-3">
               <h4 className="font-semibold">Популярные места</h4>
-              {locations.map((location, idx) => (
+              {locations.map((location: any, idx: number) => (
                 <Card key={idx} className="p-4 hover:scale-[1.01] transition-transform">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                        <Icon name={location.icon as any} size={20} className="text-primary" />
+                        <Icon name={location.icon || 'MapPin'} size={20} className="text-primary" />
                       </div>
                       <div>
                         <h5 className="font-semibold">{location.name}</h5>
@@ -253,7 +226,7 @@ const Index = () => {
 
             <div className="grid md:grid-cols-5 gap-3">
               <h4 className="font-semibold md:col-span-5">Районы Ижевска</h4>
-              {districts.map((district, idx) => (
+              {districts.map((district: any, idx: number) => (
                 <Card key={idx} className={`p-4 ${district.color}/20 border-2 border-current hover:scale-105 transition-transform`}>
                   <h5 className="font-semibold mb-1">{district.name}</h5>
                   <p className="text-xs text-muted-foreground">{district.population}</p>
